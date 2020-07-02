@@ -11,29 +11,70 @@
 <body>
     <canvas id="canvas" width="150" height="150"></canvas>
     <script>
-
-
+        //获取canvas
         var canvas = document.getElementById("canvas");
+        //检测是否支持触屏
+        var isTouchDevice = 'ontouchstart' in document.documentElement
+        //canvas的宽高等于视口的宽高，canvas是inline
         canvas.width = document.documentElement.clientWidth
         canvas.height = document.documentElement.clientHeight
+
         var ctx = canvas.getContext("2d")
         ctx.fillStyle = "black"
-        var painting = false
-        canvas.onmousedown = () => {
-            painting = true
+        ctx.lineWidth = 8
+        //line end round
+        ctx.lineCap = "round"
+        ctx.lineJoin = "round";
+        //画线函数
+        function drawline(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
         }
-        canvas.onmousemove = (e) => {
-            if (painting) {
 
-                ctx.beginPath();
-                ctx.arc(e.clientX, e.clientY, 5, 0, 2 * Math.PI);
+        //判断PC端画线什么时候开始结束
+        var painting = false
+        //手机端
+        if (isTouchDevice === true) {
+            //保存每次画线开始的起点
+            let startX = 0
+            let startY = 0
+            canvas.ontouchstart = (e) => {
+                //触屏要判断是第几个手指
+                startX = e.touches[0].clientX
+                startY = e.touches[0].clientY
+            }
 
-                ctx.fill();
+            canvas.ontouchmove = (e) => {
+
+
+                drawline(startX, startY, e.touches[0].clientX, e.touches[0].clientY)
+                startX = e.touches[0].clientX
+                startY = e.touches[0].clientY
             }
         }
-        canvas.onmouseup = () => {
-            painting = false
+        //PC端
+        else {
+            let startX = 0
+            let startY = 0
+            canvas.onmousedown = (e) => {
+                painting = true
+                startX = e.clientX
+                startY = e.clientY
+            }
+            canvas.onmousemove = (e) => {
+                if (painting) {
+                    drawline(startX, startY, e.clientX, e.clientY)
+                    startX = e.clientX
+                    startY = e.clientY
+                }
+            }
+            canvas.onmouseup = () => {
+                painting = false
+            }
         }
+
 
 
     </script>
